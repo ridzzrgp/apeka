@@ -3,141 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pro Runner V2 - Mobile Optimized</title>
+    <title>Pro Runner V4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-editor: #121212;
             --bg-nav: #1e1e1e;
+            --bg-body: #121212;
             --accent: #00a8ff;
-            --text: #ffffff;
-            --safe-top: env(safe-area-inset-top);
+            --header-height: 60px;
+            --safe-top: env(safe-area-inset-top, 0px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            background: var(--bg-editor); 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-body); 
             height: 100vh; 
-            overflow: hidden; 
-            display: flex; 
+            width: 100vw;
+            overflow: hidden; /* Mengunci layar utama agar navigasi tidak ikut geser */
+            display: flex;
             flex-direction: column;
         }
 
-        /* Header dengan Padding Aman (Safe Area) */
+        /* HEADER TETAP DI ATAS - TIDAK AKAN PERNAH HILANG */
         header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            height: calc(var(--header-height) + var(--safe-top));
+            padding-top: var(--safe-top);
             background: var(--bg-nav);
-            padding-top: calc(var(--safe-top) + 10px);
-            padding-bottom: 10px;
-            padding-left: 20px;
-            padding-right: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-left: 15px;
+            padding-right: 15px;
             border-bottom: 1px solid #333;
-            z-index: 100;
-            transition: all 0.3s ease;
+            z-index: 9999; /* Z-Index Dewa agar tidak tertutup konten HTML apapun */
         }
 
-        /* Sembunyikan header dikit pas mode preview biar lega */
-        header.compact { padding-top: 10px; padding-bottom: 5px; }
-
-        .brand { 
-            font-size: 16px; 
-            font-weight: 800; 
-            color: var(--text);
-            letter-spacing: -0.5px;
-        }
+        .brand { font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
         .brand span { color: var(--accent); }
 
-        .controls { display: flex; align-items: center; gap: 15px; }
+        .top-controls { display: flex; align-items: center; gap: 10px; }
 
-        /* Tombol File Modis */
-        .file-label {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background: #2a2a2a;
-            color: #aaa;
-            cursor: pointer;
-            border: 1px solid #444;
+        .icon-btn {
+            background: #2a2a2a; border: 1px solid #444; color: #aaa;
+            width: 38px; height: 38px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* Toggle Switch bergaya Acode */
-        .switcher {
-            display: flex;
-            background: #2a2a2a;
-            padding: 4px;
-            border-radius: 10px;
-            border: 1px solid #444;
+        .switcher { 
+            display: flex; background: #2a2a2a; padding: 3px; 
+            border-radius: 8px; border: 1px solid #444; 
         }
 
         .sw-btn {
-            border: none;
-            background: transparent;
-            color: #777;
-            padding: 6px 14px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
+            border: none; background: transparent; color: #777; 
+            padding: 6px 15px; border-radius: 6px; font-size: 13px;
+            font-weight: bold; transition: 0.2s;
         }
 
-        .sw-btn.active {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 168, 255, 0.3);
-        }
+        .sw-btn.active { background: var(--accent); color: white; }
 
-        /* Layout Utama */
-        main { flex: 1; position: relative; width: 100%; background: var(--bg-editor); }
+        /* AREA KONTEN MULAI DI BAWAH HEADER */
+        main {
+            flex: 1;
+            margin-top: calc(var(--header-height) + var(--safe-top));
+            position: relative;
+            background: var(--bg-body);
+            overflow: hidden;
+        }
 
         #editor-container, #preview-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0; left: 0;
-            transition: opacity 0.2s ease;
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
         }
 
         #preview-container { display: none; background: white; }
 
+        /* OPTIMASI TEXTAREA UNTUK 10.000+ BARIS */
         textarea {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            color: #cfcfcf;
-            border: none;
-            padding: 20px;
-            font-family: 'Fira Code', monospace;
-            font-size: 13px;
-            outline: none;
-            resize: none;
-            line-height: 1.6;
+            width: 100%; height: 100%;
+            background: #000; color: #cfcfcf;
+            border: none; padding: 15px;
+            font-family: 'Fira Code', monospace; font-size: 12px;
+            outline: none; resize: none;
+            white-space: pre; overflow: auto;
+            word-wrap: normal;
+            /* Tambahan agar paste lancar */
+            -webkit-overflow-scrolling: touch;
         }
 
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Spinner Loading */
         #loader {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-editor);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18,18,18,0.9); display: none; 
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10000;
         }
+
         .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #222;
-            border-top: 4px solid var(--accent);
-            border-radius: 50%;
+            width: 30px; height: 30px; border: 3px solid #333;
+            border-top: 3px solid var(--accent); border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -147,22 +116,15 @@
 </head>
 <body>
 
-    <header id="mainHeader">
-        <div class="brand">PRO<span>RUNNER</span></div>
-        
-        <div class="controls">
-            <label for="fileInput" class="file-label" title="Upload File">
-                <i class="fas fa-file-upload"></i>
-            </label>
+    <header>
+        <div class="brand">PRO<span>RUNNER V4</span></div>
+        <div class="top-controls">
+            <label for="fileInput" class="icon-btn"><i class="fas fa-file-import"></i></label>
             <input type="file" id="fileInput" accept=".html">
-
+            
             <div class="switcher">
-                <button id="btnCode" class="sw-btn active" onclick="switchTo('code')">
-                    <i class="fas fa-code"></i>
-                </button>
-                <button id="btnRun" class="sw-btn" onclick="switchTo('run')">
-                    <i class="fas fa-play"></i>
-                </button>
+                <button id="btnCode" class="sw-btn active" onclick="switchTo('code')"><i class="fas fa-code"></i></button>
+                <button id="btnRun" class="sw-btn" onclick="switchTo('run')"><i class="fas fa-play"></i></button>
             </div>
         </div>
     </header>
@@ -170,11 +132,14 @@
     <main>
         <div id="loader">
             <div class="spinner"></div>
-            <p style="margin-top: 15px; font-size: 12px; color: #666;">LOADING PREVIEW...</p>
+            <p style="color:#666; font-size:10px; margin-top:10px;">RENDERING...</p>
         </div>
 
         <div id="editor-container">
-            <textarea id="codeInput" placeholder="Tempel kode gateway kamu di sini..."></textarea>
+            <textarea id="codeInput" 
+                spellcheck="false" wrap="off" 
+                autocorrect="off" autocapitalize="off"
+                placeholder="Paste code di sini..."></textarea>
         </div>
 
         <div id="preview-container">
@@ -183,55 +148,52 @@
     </main>
 
     <script>
-        const header = document.getElementById('mainHeader');
         const editorCont = document.getElementById('editor-container');
         const previewCont = document.getElementById('preview-container');
         const btnCode = document.getElementById('btnCode');
         const btnRun = document.getElementById('btnRun');
         const codeInput = document.getElementById('codeInput');
-        const loader = document.getElementById('loader');
         const frame = document.getElementById('outputFrame');
-        const fileInput = document.getElementById('fileInput');
+        const loader = document.getElementById('loader');
 
         let blobUrl = null;
 
         function switchTo(mode) {
             if (mode === 'code') {
-                // Pindah ke Editor
                 previewCont.style.display = 'none';
                 editorCont.style.display = 'block';
                 btnRun.classList.remove('active');
                 btnCode.classList.add('active');
-                header.classList.remove('compact');
             } else {
-                // Pindah ke Preview (Run)
                 const code = codeInput.value;
-                if (!code.trim()) return alert("Kodenya kosong, Boss!");
+                if (!code.trim()) return;
 
                 loader.style.display = 'flex';
                 
+                // Gunakan Blob agar 10k baris tidak membebani memori Iframe
                 setTimeout(() => {
-                    if (blobUrl) URL.revokeObjectURL(blobUrl);
-                    
-                    const blob = new Blob([code], { type: 'text/html' });
-                    blobUrl = URL.createObjectURL(blob);
-                    frame.src = blobUrl;
+                    try {
+                        if (blobUrl) URL.revokeObjectURL(blobUrl);
+                        const blob = new Blob([code], { type: 'text/html' });
+                        blobUrl = URL.createObjectURL(blob);
+                        frame.src = blobUrl;
 
-                    editorCont.style.display = 'none';
-                    previewCont.style.display = 'block';
-                    btnCode.classList.remove('active');
-                    btnRun.classList.add('active');
-                    header.classList.add('compact'); // Header jadi lebih kecil biar muat banyak
+                        editorCont.style.display = 'none';
+                        previewCont.style.display = 'block';
+                        btnCode.classList.remove('active');
+                        btnRun.classList.add('active');
 
-                    frame.onload = () => {
+                        frame.onload = () => { loader.style.display = 'none'; };
+                    } catch (e) {
+                        alert("Error: " + e.message);
                         loader.style.display = 'none';
-                    };
-                }, 400); // Jeda sedikit biar mata nggak kaget (anti-lag)
+                    }
+                }, 50); 
             }
         }
 
-        // Handle Upload
-        fileInput.addEventListener('change', (e) => {
+        // Handle File Upload secara langsung (Solusi paling stabil untuk file raksasa)
+        document.getElementById('fileInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
