@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pro Runner V8</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-nav: #1a1a1a;
+            --bg-editor: #000;
+            --accent: #00a8ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* KUNCI: Layout Flexbox memisahkan Header dan Konten */
+        body { 
+            height: 100vh; width: 100vw; 
+            display: flex; flex-direction: column; 
+            overflow: hidden; background: var(--bg-editor);
+            font-family: sans-serif;
+        }
+
+        /* HEADER BOX (TETAP & TERKUNCI) */
+        header {
+            height: 65px;
+            background: var(--bg-nav);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 2px solid #333;
+            flex-shrink: 0; /* Header tidak boleh mengecil */
+            z-index: 1000;
+        }
+
+        .brand { color: #fff; font-weight: 900; font-size: 14px; }
+        .brand span { color: var(--accent); }
+
+        .controls { display: flex; align-items: center; gap: 15px; }
+
+        .btn-import { color: #888; font-size: 20px; cursor: pointer; }
+
+        /* SWITCHER IKON SAJA */
+        .switcher {
+            display: flex; background: #2a2a2a; padding: 4px; border-radius: 10px; border: 1px solid #444;
+        }
+
+        .sw-btn {
+            border: none; background: transparent; color: #555;
+            width: 45px; height: 35px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; transition: 0.2s;
+        }
+
+        .sw-btn.active { background: var(--accent); color: #fff; }
+
+        /* MAIN AREA (PUNYA SCROLL SENDIRI) */
+        main {
+            flex: 1; /* Mengisi sisa layar */
+            position: relative;
+            background: var(--bg-editor);
+            overflow: hidden;
+        }
+
+        #editor-container, #preview-container {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+        }
+
+        #preview-container { display: none; background: #fff; }
+
+        /* TEXTAREA DENGAN JARAK AMAN (PADDING) */
+        textarea {
+            width: 100%; height: 100%;
+            background: transparent; color: #cfcfcf;
+            border: none; padding: 20px; /* Jarak agar tidak mepet ke header */
+            font-family: 'monospace'; font-size: 13px;
+            outline: none; resize: none;
+            white-space: pre; overflow: auto;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">PRO<span>RUNNER</span></div>
+        <div class="controls">
+            <label for="fileInput" class="btn-import"><i class="fas fa-file-upload"></i></label>
+            <input type="file" id="fileInput" accept=".html">
+            
+            <div class="switcher">
+                <button id="btnCode" class="sw-btn active" onclick="switchTo('code')"><i class="fas fa-code"></i></button>
+                <button id="btnRun" class="sw-btn" onclick="switchTo('run')"><i class="fas fa-play"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="editor-container">
+            <textarea id="codeInput" spellcheck="false" wrap="off" placeholder="Tempel kode di sini..."></textarea>
+        </div>
+        <div id="preview-container">
+            <iframe id="outputFrame"></iframe>
+        </div>
+    </main>
+
+    <script>
+        const editorCont = document.getElementById('editor-container');
+        const previewCont = document.getElementById('preview-container');
+        const btnCode = document.getElementById('btnCode');
+        const btnRun = document.getElementById('btnRun');
+        const codeInput = document.getElementById('codeInput');
+        const frame = document.getElementById('outputFrame');
+
+        let blobUrl = null;
+
+        function switchTo(mode) {
+            if (mode === 'code') {
+                previewCont.style.display = 'none';
+                editorCont.style.display = 'block';
+                btnRun.classList.remove('active');
+                btnCode.classList.add('active');
+            } else {
+                const code = codeInput.value;
+                if (!code.trim()) return;
+                
+                if (blobUrl) URL.revokeObjectURL(blobUrl);
+                const blob = new Blob([code], { type: 'text/html' });
+                blobUrl = URL.createObjectURL(blob);
+                frame.src = blobUrl;
+
+                editorCont.style.display = 'none';
+                previewCont.style.display = 'block';
+                btnCode.classList.remove('active');
+                btnRun.classList.add('active');
+            }
+        }
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                codeInput.value = ev.target.result;
+                switchTo('run');
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
