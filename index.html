@@ -3,119 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Runner - Anti Lag & File Support</title>
+    <title>Mobile Code Runner - Acode Style</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #0070f3; --bg: #0f0f0f; --card: #1a1a1a; --text: #efefef; }
-        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        :root {
+            --bg-editor: #1e1e1e;
+            --bg-nav: #252526;
+            --accent: #0078d4;
+            --text: #d4d4d4;
+        }
 
-        /* Header & Toolbar */
-        header { padding: 10px 20px; background: var(--card); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .btn-group { display: flex; gap: 8px; align-items: center; }
-        
-        /* Layout */
-        main { display: flex; flex: 1; position: relative; }
-        .editor-container { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
-        .preview-container { flex: 1; background: white; position: relative; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-editor); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Navbar / Header */
+        header {
+            background: var(--bg-nav);
+            height: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid #333;
+            z-index: 100;
+        }
+
+        .brand { color: var(--accent); font-weight: bold; font-size: 14px; letter-spacing: 1px; }
+
+        .toggle-container {
+            display: flex;
+            background: #333;
+            border-radius: 6px;
+            padding: 3px;
+        }
+
+        .toggle-btn {
+            padding: 6px 15px;
+            border: none;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .toggle-btn i { font-size: 14px; }
+
+        /* Main Content */
+        main { flex: 1; position: relative; width: 100%; }
+
+        /* Editor Section */
+        #editor-view {
+            width: 100%;
+            height: 100%;
+            display: block; /* Default View */
+        }
+
         textarea {
-            flex: 1; background: transparent; color: #aaa; border: none; padding: 20px;
-            font-family: 'Fira Code', monospace; font-size: 13px; resize: none; outline: none; line-height: 1.5;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-editor);
+            color: var(--text);
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            line-height: 1.6;
         }
 
-        iframe { width: 100%; height: 100%; border: none; display: block; }
-
-        /* Buttons & Inputs */
-        button {
-            padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer;
-            font-weight: 500; transition: 0.2s; font-size: 13px;
+        /* Preview Section */
+        #preview-view {
+            width: 100%;
+            height: 100%;
+            display: none; /* Hidden by default */
+            background: white;
         }
-        .btn-run { background: var(--primary); color: white; }
-        .btn-file { background: #333; color: white; position: relative; overflow: hidden; }
-        .btn-file input { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* Animasi Loading */
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Loader Animation */
         #loader {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 100;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 200;
         }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid var(--primary);
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { margin-top: 15px; font-size: 14px; color: var(--primary); letter-spacing: 1px; }
 
-        .label-tag { background: #333; padding: 2px 8px; border-radius: 4px; font-size: 10px; margin-bottom: 5px; display: inline-block; }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* File Upload Hidden */
+        #fileInput { display: none; }
+        .btn-upload { color: #aaa; margin-right: 15px; cursor: pointer; font-size: 18px; }
+        .btn-upload:hover { color: var(--accent); }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="font-weight: 700; font-size: 18px;">⚡ <span style="color:var(--primary)">Vercel</span>Runner</div>
-        <div class="btn-group">
-            <button class="btn-file">
-                📁 Upload HTML
-                <input type="file" id="fileInput" accept=".html">
-            </button>
-            <button class="btn-run" onclick="triggerRun()">Run Project 🚀</button>
+        <div class="brand">PRO <span style="color:white">RUNNER</span></div>
+        
+        <div style="display: flex; align-items: center;">
+            <label for="fileInput" class="btn-upload" title="Upload HTML">
+                <i class="fas fa-file-import"></i>
+            </label>
+            <input type="file" id="fileInput" accept=".html">
+
+            <div class="toggle-container">
+                <button id="btn-code" class="toggle-btn active" onclick="showEditor()">
+                    <i class="fas fa-code"></i>
+                </button>
+                <button id="btn-run" class="toggle-btn" onclick="showPreview()">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
         </div>
     </header>
 
     <main>
         <div id="loader">
             <div class="spinner"></div>
-            <div class="loading-text">SEDANG MENYIAPKAN TAMPILAN...</div>
         </div>
 
-        <div class="editor-container">
-            <div style="padding: 10px 20px; font-size: 11px; color: #666;">EDITOR (PASTE DISINI)</div>
-            <textarea id="codeInput" placeholder=""></textarea>
+        <div id="editor-view">
+            <textarea id="codeInput" placeholder="Masukkan kode HTML/CSS/JS di sini..."></textarea>
         </div>
 
-        <div class="preview-container">
+        <div id="preview-view">
             <iframe id="outputFrame"></iframe>
         </div>
     </main>
 
     <script>
+        const editorView = document.getElementById('editor-view');
+        const previewView = document.getElementById('preview-view');
+        const btnCode = document.getElementById('btn-code');
+        const btnRun = document.getElementById('btn-run');
         const codeInput = document.getElementById('codeInput');
-        const fileInput = document.getElementById('fileInput');
         const loader = document.getElementById('loader');
         const frame = document.getElementById('outputFrame');
+        const fileInput = document.getElementById('fileInput');
+
         let currentBlobUrl = null;
 
-        // 1. Fitur Upload File (Anti Lag saat input besar)
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                codeInput.value = event.target.result;
-                triggerRun(); // Langsung jalankan setelah upload
-            };
-            reader.readAsText(file);
-        });
-
-        // 2. Fungsi Trigger dengan Animasi (Anti Lag saat Render)
-        function triggerRun() {
-            const code = codeInput.value;
-            if (!code.trim()) return;
-
-            // Tampilkan animasi loading
-            loader.style.display = 'flex';
-
-            // Gunakan setTimeout agar browser sempat merender animasi 'Loader' 
-            // sebelum melakukan proses berat di background
-            setTimeout(() => {
-                executeRendering(code);
-            }, 300); 
+        // Fungsi Tampilkan Editor
+        function showEditor() {
+            previewView.style.display = 'none';
+            editorView.style.display = 'block';
+            btnRun.classList.remove('active');
+            btnCode.classList.add('active');
         }
 
-        function executeRendering(code) {
-            try {
+        // Fungsi Tampilkan Preview (Anti Lag)
+        function showPreview() {
+            const code = codeInput.value;
+            
+            // Aktifkan tombol & Tampilkan Loader
+            btnCode.classList.remove('active');
+            btnRun.classList.add('active');
+            loader.style.display = 'flex';
+
+            // Jeda sebentar agar UI tidak freeze saat proses render
+            setTimeout(() => {
                 if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
 
                 const blob = new Blob([code], { type: 'text/html' });
@@ -123,15 +191,36 @@
                 
                 frame.src = currentBlobUrl;
 
-                // Sembunyikan loader setelah iframe mulai memuat
+                // Tampilkan frame hasil
+                editorView.style.display = 'none';
+                previewView.style.display = 'block';
+
                 frame.onload = () => {
                     loader.style.display = 'none';
                 };
-            } catch (err) {
-                alert("Gagal memproses kode: " + err);
-                loader.style.display = 'none';
-            }
+            }, 300);
         }
+
+        // Handle File Upload
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                codeInput.value = event.target.result;
+                showPreview(); // Langsung lihat hasil setelah upload
+            };
+            reader.readAsText(file);
+        });
+
+        // Shortcut Ctrl+S atau Ctrl+Enter untuk Run
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && (e.key === 'Enter' || e.key === 's')) {
+                e.preventDefault();
+                showPreview();
+            }
+        });
     </script>
 </body>
 </html>
