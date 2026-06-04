@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pro Runner</title>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
 *{
@@ -59,6 +61,31 @@ font-weight:bold;
 cursor:pointer;
 }
 
+.cr-group{
+display:flex;
+align-items:center;
+background:#252a35;
+border-radius:8px;
+overflow:hidden;
+height:35px;
+}
+
+.cr-btn{
+width:40px;
+height:35px;
+border:none;
+background:transparent;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+
+.cr-divider{
+width:1px;
+height:18px;
+background:#4b5568;
+}
+
 /* AREA KONTEN */
 #content{
 position:fixed;
@@ -105,16 +132,22 @@ PRO RUNNER
 <div id="menu">
 
 <label for="fileInput">
-<button class="btn" type="button" onclick="openFile()">U</button>
+<button class="btn" type="button" onclick="openFile()"><i class="fas fa-upload"></i>
+</button>
 </label>
 
-<button class="btn" onclick="showCode()">
+<div class="cr-group">
+
+<button class="cr-btn" onclick="showCode()">
 C
 </button>
 
-<button class="btn" onclick="runCode()">
-R
+<div class="cr-divider"></div>
+
+<button class="cr-btn" onclick="runCode()"><i class="fas fa-play"></i>
 </button>
+
+</div>
 
 </div>
 
