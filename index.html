@@ -105,7 +105,7 @@ PRO RUNNER
 <div id="menu">
 
 <label for="fileInput">
-<button class="btn" type="button">U</button>
+<button class="btn" type="button" onclick="openFile()">U</button>
 </label>
 
 <button class="btn" onclick="showCode()">
@@ -187,6 +187,13 @@ editor.value=ev.target.result;
 reader.readAsText(file);
 
 });
+
+const fileInput =
+document.getElementById("fileInput");
+
+function openFile(){
+fileInput.click();
+}
 
 </script>
 
