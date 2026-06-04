@@ -2,77 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pro Runner V4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pro Runner V5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-nav: #1e1e1e;
-            --bg-body: #121212;
+            --bg-editor: #000000;
             --accent: #00a8ff;
-            --header-height: 60px;
-            --safe-top: env(safe-area-inset-top, 0px);
+            --text: #ffffff;
         }
 
+        /* KUNCI UTAMA: Matikan scroll di body */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-body); 
-            height: 100vh; 
-            width: 100vw;
-            overflow: hidden; /* Mengunci layar utama agar navigasi tidak ikut geser */
-            display: flex;
-            flex-direction: column;
+        body, html { 
+            height: 100%; 
+            width: 100%;
+            overflow: hidden; /* Biar C|R gak ikut keseret */
+            background: var(--bg-editor);
+            font-family: sans-serif;
         }
 
-        /* HEADER TETAP DI ATAS - TIDAK AKAN PERNAH HILANG */
+        /* CONTAINER FLEXBOX: Membagi Atas & Bawah */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* HEADER (C | R) - Tetap di Atas */
         header {
-            position: fixed;
-            top: 0; left: 0; width: 100%;
-            height: calc(var(--header-height) + var(--safe-top));
-            padding-top: var(--safe-top);
+            height: 65px;
             background: var(--bg-nav);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-left: 15px;
-            padding-right: 15px;
-            border-bottom: 1px solid #333;
-            z-index: 9999; /* Z-Index Dewa agar tidak tertutup konten HTML apapun */
+            padding: 0 15px;
+            border-bottom: 2px solid #333;
+            flex-shrink: 0; /* Jangan biarkan header mengecil */
+            z-index: 999;
         }
 
-        .brand { font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
+        .brand { color: #fff; font-weight: 800; font-size: 14px; }
         .brand span { color: var(--accent); }
 
-        .top-controls { display: flex; align-items: center; gap: 10px; }
+        .controls { display: flex; align-items: center; gap: 10px; }
 
-        .icon-btn {
-            background: #2a2a2a; border: 1px solid #444; color: #aaa;
-            width: 38px; height: 38px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
+        .btn-upload {
+            color: #aaa; font-size: 18px; padding: 10px;
         }
 
-        .switcher { 
-            display: flex; background: #2a2a2a; padding: 3px; 
-            border-radius: 8px; border: 1px solid #444; 
+        .switcher {
+            display: flex; background: #2a2a2a; padding: 4px; border-radius: 8px;
         }
 
         .sw-btn {
-            border: none; background: transparent; color: #777; 
-            padding: 6px 15px; border-radius: 6px; font-size: 13px;
-            font-weight: bold; transition: 0.2s;
+            border: none; background: transparent; color: #888;
+            padding: 7px 16px; border-radius: 6px; font-weight: bold;
+            font-size: 12px;
         }
 
-        .sw-btn.active { background: var(--accent); color: white; }
+        .sw-btn.active {
+            background: var(--accent); color: white;
+        }
 
-        /* AREA KONTEN MULAI DI BAWAH HEADER */
+        /* AREA KONTEN (MAIN) - Punya Scroll Sendiri */
         main {
-            flex: 1;
-            margin-top: calc(var(--header-height) + var(--safe-top));
+            flex: 1; /* Ambil sisa layar */
             position: relative;
-            background: var(--bg-body);
             overflow: hidden;
+            background: var(--bg-editor);
         }
 
         #editor-container, #preview-container {
@@ -80,72 +80,59 @@
             position: absolute; top: 0; left: 0;
         }
 
-        #preview-container { display: none; background: white; }
-
-        /* OPTIMASI TEXTAREA UNTUK 10.000+ BARIS */
+        /* JARAK (PADDING) AGAR KODE GAK MEPET HEADER */
         textarea {
             width: 100%; height: 100%;
-            background: #000; color: #cfcfcf;
-            border: none; padding: 15px;
-            font-family: 'Fira Code', monospace; font-size: 12px;
+            background: transparent; color: #00ff00;
+            border: none; padding: 20px; /* Jarak yang kamu mau */
+            font-family: monospace; font-size: 13px;
             outline: none; resize: none;
             white-space: pre; overflow: auto;
-            word-wrap: normal;
-            /* Tambahan agar paste lancar */
-            -webkit-overflow-scrolling: touch;
         }
 
-        iframe { width: 100%; height: 100%; border: none; }
+        iframe { width: 100%; height: 100%; border: none; background: white; }
 
         #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(18,18,18,0.9); display: none; 
+            position: fixed; top: 65px; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none;
             flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10000;
+            z-index: 1000;
         }
-
-        .spinner {
-            width: 30px; height: 30px; border: 3px solid #333;
-            border-top: 3px solid var(--accent); border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
+        
         #fileInput { display: none; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="brand">PRO<span>RUNNER V4</span></div>
-        <div class="top-controls">
-            <label for="fileInput" class="icon-btn"><i class="fas fa-file-import"></i></label>
-            <input type="file" id="fileInput" accept=".html">
-            
-            <div class="switcher">
-                <button id="btnCode" class="sw-btn active" onclick="switchTo('code')"><i class="fas fa-code"></i></button>
-                <button id="btnRun" class="sw-btn" onclick="switchTo('run')"><i class="fas fa-play"></i></button>
+    <div class="app-container">
+        <header>
+            <div class="brand">PRO<span>RUNNER V5</span></div>
+            <div class="controls">
+                <label for="fileInput" class="btn-upload"><i class="fas fa-file-code"></i></label>
+                <input type="file" id="fileInput" accept=".html">
+                
+                <div class="switcher">
+                    <button id="btnCode" class="sw-btn active" onclick="switchTo('code')">CODE</button>
+                    <button id="btnRun" class="sw-btn" onclick="switchTo('run')">RUN</button>
+                </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <main>
-        <div id="loader">
-            <div class="spinner"></div>
-            <p style="color:#666; font-size:10px; margin-top:10px;">RENDERING...</p>
-        </div>
+        <main>
+            <div id="loader"><div style="color:var(--accent)">Loading...</div></div>
 
-        <div id="editor-container">
-            <textarea id="codeInput" 
-                spellcheck="false" wrap="off" 
-                autocorrect="off" autocapitalize="off"
-                placeholder="Paste code di sini..."></textarea>
-        </div>
+            <div id="editor-container">
+                <textarea id="codeInput" 
+                    spellcheck="false" wrap="off" 
+                    autocorrect="off" autocapitalize="off"
+                    placeholder="Tempel kode di sini..."></textarea>
+            </div>
 
-        <div id="preview-container">
-            <iframe id="outputFrame"></iframe>
-        </div>
-    </main>
+            <div id="preview-container">
+                <iframe id="outputFrame"></iframe>
+            </div>
+        </main>
+    </div>
 
     <script>
         const editorCont = document.getElementById('editor-container');
@@ -170,29 +157,22 @@
 
                 loader.style.display = 'flex';
                 
-                // Gunakan Blob agar 10k baris tidak membebani memori Iframe
                 setTimeout(() => {
-                    try {
-                        if (blobUrl) URL.revokeObjectURL(blobUrl);
-                        const blob = new Blob([code], { type: 'text/html' });
-                        blobUrl = URL.createObjectURL(blob);
-                        frame.src = blobUrl;
+                    if (blobUrl) URL.revokeObjectURL(blobUrl);
+                    const blob = new Blob([code], { type: 'text/html' });
+                    blobUrl = URL.createObjectURL(blob);
+                    frame.src = blobUrl;
 
-                        editorCont.style.display = 'none';
-                        previewCont.style.display = 'block';
-                        btnCode.classList.remove('active');
-                        btnRun.classList.add('active');
+                    editorCont.style.display = 'none';
+                    previewCont.style.display = 'block';
+                    btnCode.classList.remove('active');
+                    btnRun.classList.add('active');
 
-                        frame.onload = () => { loader.style.display = 'none'; };
-                    } catch (e) {
-                        alert("Error: " + e.message);
-                        loader.style.display = 'none';
-                    }
+                    frame.onload = () => { loader.style.display = 'none'; };
                 }, 50); 
             }
         }
 
-        // Handle File Upload secara langsung (Solusi paling stabil untuk file raksasa)
         document.getElementById('fileInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
