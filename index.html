@@ -1,234 +1,463 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pro Runner</title>
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="manifest" href="./manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f1115">
+  <title>Pro Runner</title>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="manifest" href="/manifest.json">
 
-html,body{
-width:100%;
-height:100%;
-overflow:hidden;
-font-family:Arial,sans-serif;
-background:#0f1115;
-padding-top:0;
-}
+  <!-- CodeMirror 5: editor dengan syntax highlighting HTML -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
 
-/* HEADER TETAP */
-#header{
-position:fixed;
-top:25px;
-left:0;
-right:0;
-height:55px;
-background:#181b22;
-border-bottom:1px solid #333;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 10px;
-z-index:99999;
-}
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-#title{
-color:white;
-font-weight:bold;
-font-size:16px;
-}
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #0f1115;
+    }
 
-#menu{
-display:flex;
-gap:6px;
-}
+    #header {
+      position: fixed;
+      top: 25px;
+      left: 0;
+      right: 0;
+      height: 55px;
+      background: #181b22;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 10px;
+      z-index: 99999;
+    }
 
-.btn{
-width:40px;
-height:35px;
-border:none;
-border-radius:8px;
-background:#252a35;
-color:white;
-font-weight:bold;
-cursor:pointer;
-}
+    #title {
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      white-space: nowrap;
+    }
 
-.cr-group{
-display:flex;
-align-items:center;
-background:#252a35;
-border-radius:8px;
-overflow:hidden;
-height:35px;
-}
+    #menu {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-.cr-btn{
-width:40px;
-height:35px;
-border:none;
-background:transparent;
-color:white;
-cursor:pointer;
-font-weight:bold;
-}
+    .btn,
+    .tool-btn {
+      width: 36px;
+      height: 35px;
+      flex: 0 0 36px;
+      border: none;
+      border-radius: 8px;
+      background: #252a35;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
 
-.cr-divider{
-width:1px;
-height:18px;
-background:#4b5568;
-}
+    .btn:active,
+    .tool-btn:active {
+      background: #354052;
+    }
 
-/* AREA KONTEN */
-#content{
-position:fixed;
-top:80px;
-left:0;
-right:0;
-bottom:0;
-}
+    #content {
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      overflow: hidden;
+    }
 
-/* EDITOR */
-#editor{
-width:100%;
-height:100%;
-background:#111;
-color:#fff;
-border:none;
-outline:none;
-resize:none;
-padding:12px;
-font-family:monospace;
-font-size:14px;
-}
+    #editorPane {
+      min-width: 0;
+      min-height: 0;
+      background: #111;
+    }
 
-/* PREVIEW */
-#preview{
-width:100%;
-height:100%;
-border:none;
-display:none;
-background:white;
-}
+    #editor {
+      display: block;
+      width: 100%;
+      height: 100%;
+      padding: 12px;
+      resize: none;
+      outline: none;
+      border: none;
+      background: #111;
+      color: #fff;
+      font: 14px/1.5 monospace;
+      tab-size: 2;
+    }
 
-</style>
+    .CodeMirror {
+      width: 100%;
+      height: 100%;
+      font: 14px/1.5 monospace;
+    }
+
+    .CodeMirror-gutters {
+      border-right: 1px solid #30343d;
+    }
+
+    #preview {
+      display: none;
+      min-width: 0;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    /* Mode editor: hanya editor yang terlihat */
+    #content.mode-editor #editorPane {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #content.mode-editor #preview {
+      display: none;
+    }
+
+    /* Mode preview: hanya hasil website yang terlihat */
+    #content.mode-preview #editorPane {
+      display: none;
+    }
+
+    #content.mode-preview #preview {
+      display: block;
+    }
+
+    /* Mode live: editor dan hasil website tampil bersamaan */
+    #content.mode-live {
+      flex-direction: column;
+    }
+
+    #content.mode-live #editorPane {
+      display: block;
+      width: 100%;
+      height: 50%;
+      flex: 0 0 50%;
+      border-bottom: 1px solid #3a3f49;
+    }
+
+    #content.mode-live #preview {
+      display: block;
+      width: 100%;
+      height: 50%;
+      flex: 0 0 50%;
+    }
+
+    @media (min-width: 900px) {
+      #content.mode-live {
+        flex-direction: row;
+      }
+
+      #content.mode-live #editorPane {
+        width: 50%;
+        height: 100%;
+        flex: 0 0 50%;
+        border-bottom: none;
+        border-right: 1px solid #3a3f49;
+      }
+
+      #content.mode-live #preview {
+        width: 50%;
+        height: 100%;
+        flex: 0 0 50%;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #header {
+        padding: 0 6px;
+        gap: 4px;
+      }
+
+      #title {
+        font-size: 13px;
+      }
+
+      #menu {
+        gap: 3px;
+      }
+
+      .btn,
+      .tool-btn {
+        width: 33px;
+        flex-basis: 33px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <header id="header">
+    <div id="title">PRO RUNNER</div>
 
-<div id="header">
+    <nav id="menu" aria-label="Editor tools">
+      <button class="btn" type="button" onclick="openFile()" title="Buka file HTML" aria-label="Buka file HTML">
+        <i class="fa-solid fa-upload"></i>
+      </button>
 
-<div id="title">
-PRO RUNNER
-</div>
+      <button class="tool-btn" type="button" onclick="showCode()" title="Editor" aria-label="Editor">
+        <i class="fa-solid fa-code"></i>
+      </button>
 
-<div id="menu">
+      <button class="tool-btn" type="button" onclick="runCode()" title="Preview" aria-label="Preview">
+        <i class="fa-solid fa-eye"></i>
+      </button>
 
-<label for="fileInput">
-<button class="btn" type="button" onclick="openFile()"><i class="fas fa-upload"></i>
-</button>
-</label>
+      <button class="tool-btn" type="button" onclick="showLive()" title="Live Preview" aria-label="Live Preview">
+        <i class="fa-solid fa-bolt"></i>
+      </button>
 
-<div class="cr-group">
+      <button class="tool-btn" type="button" onclick="openBrowserPreview()" title="Buka di browser" aria-label="Buka di browser">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </button>
+    </nav>
+  </header>
 
-<button class="cr-btn" onclick="showCode()"><i class="fas fa-code"></i>
-</button>
+  <input id="fileInput" type="file" accept=".html,.htm,text/html" hidden>
 
-<div class="cr-divider"></div>
+  <main id="content" class="mode-editor">
+    <section id="editorPane" aria-label="Code editor">
+      <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Tulis kode HTML di sini..."></textarea>
+    </section>
+    <iframe id="preview" title="Website preview"></iframe>
+  </main>
 
-<button class="cr-btn" onclick="runCode()"><i class="fas fa-play"></i>
-</button>
+  <!-- CodeMirror core and HTML-related modes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
 
-</div>
+  <script>
+    const textarea = document.getElementById("editor");
+    const content = document.getElementById("content");
+    const preview = document.getElementById("preview");
+    const fileInput = document.getElementById("fileInput");
 
-</div>
+    let codeEditor = null;
+    let previewTimer = null;
+    let browserPreviewUrl = null;
 
-</div>
+    // Pakai CodeMirror bila CDN berhasil dimuat. Jika gagal, textarea tetap bisa dipakai.
+    if (window.CodeMirror) {
+      codeEditor = CodeMirror.fromTextArea(textarea, {
+        mode: "htmlmixed",
+        theme: "material-darker",
+        lineNumbers: true,
+        lineWrapping: true,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        autoCloseTags: true,
+        matchBrackets: true,
+        viewportMargin: 30
+      });
 
-<input
-id="fileInput"
-type="file"
-accept=".html"
-style="display:none"
->
+      codeEditor.on("change", function () {
+        if (content.classList.contains("mode-live")) {
+          schedulePreviewUpdate();
+        }
+      });
+    }
 
-<div id="content">
+    // Fallback: jika CodeMirror tidak termuat, live preview tetap berjalan dari textarea.
+    textarea.addEventListener("input", function () {
+      if (!codeEditor && content.classList.contains("mode-live")) {
+        schedulePreviewUpdate();
+      }
+    });
 
-<textarea id="editor"
-placeholder="Tempel kode HTML di sini..."></textarea>
+    function getCode() {
+      return codeEditor ? codeEditor.getValue() : textarea.value;
+    }
 
-<iframe id="preview"></iframe>
+    function setCode(value) {
+      if (codeEditor) {
+        codeEditor.setValue(value);
+      } else {
+        textarea.value = value;
+      }
 
-</div>
+      if (content.classList.contains("mode-live")) {
+        renderPreview();
+      }
+    }
 
-<script>
+    function setMode(mode) {
+      content.classList.remove("mode-editor", "mode-preview", "mode-live");
+      content.classList.add("mode-" + mode);
 
-const editor =
-document.getElementById("editor");
+      if (codeEditor) {
+        requestAnimationFrame(function () {
+          codeEditor.refresh();
+        });
+      }
+    }
 
-const preview =
-document.getElementById("preview");
+    function showCode() {
+      setMode("editor");
+    }
 
-function showCode(){
+    function runCode() {
+      if (!getCode().trim()) {
+        alert("Masukkan kode HTML dulu.");
+        return;
+      }
 
-editor.style.display="block";
-preview.style.display="none";
+      setMode("preview");
+      renderPreview();
+    }
 
-}
+    function showLive() {
+      if (!getCode().trim()) {
+        alert("Masukkan kode HTML dulu.");
+        return;
+      }
 
-function runCode(){
+      setMode("live");
+      renderPreview();
+    }
 
-let code=editor.value.trim();
+    function schedulePreviewUpdate() {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(renderPreview, 250);
+    }
 
-if(code===""){
-alert("Masukkan kode dulu");
-return;
-}
+    // Menambahkan target tab baru dan penanganan link eksternal pada halaman preview.
+    function preparePreviewHTML(source) {
+      let html = source;
+      const baseTag = '<base target="_blank">';
 
-editor.style.display="none";
-preview.style.display="block";
+      if (/<head\b[^>]*>/i.test(html)) {
+        if (!/<base\b/i.test(html)) {
+          html = html.replace(/<head\b[^>]*>/i, function (headTag) {
+            return headTag + baseTag;
+          });
+        }
+      } else if (/<html\b[^>]*>/i.test(html)) {
+        html = html.replace(/<html\b[^>]*>/i, function (htmlTag) {
+          return htmlTag + '<head>' + baseTag + '</head>';
+        });
+      } else {
+        html = '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">' + baseTag + '</head><body>' + html + '</body></html>';
+      }
 
-/* PALING AMAN UNTUK WEBVIEW */
-preview.srcdoc=code;
+      const linkSupportScript = `
+        <script>
+          document.addEventListener('click', function (event) {
+            const anchor = event.target.closest && event.target.closest('a[href]');
+            if (!anchor || anchor.hasAttribute('download')) return;
 
-}
+            const rawHref = anchor.getAttribute('href');
+            if (!rawHref || rawHref.startsWith('#') || /^(javascript:|data:)/i.test(rawHref)) return;
 
-document
-.getElementById("fileInput")
-.addEventListener("change",function(e){
+            let destination;
+            try { destination = new URL(rawHref, document.baseURI); }
+            catch (error) { return; }
 
-let file=e.target.files[0];
+            if (!['http:', 'https:', 'mailto:', 'tel:'].includes(destination.protocol)) return;
 
-if(!file)return;
+            event.preventDefault();
+            window.open(destination.href, '_blank', 'noopener,noreferrer');
+          }, true);
+        <\/script>
+      `;
 
-let reader=new FileReader();
+      if (/<\/body\s*>/i.test(html)) {
+        html = html.replace(/<\/body\s*>/i, linkSupportScript + '</body>');
+      } else {
+        html += linkSupportScript;
+      }
 
-reader.onload=function(ev){
+      return html;
+    }
 
-editor.value=ev.target.result;
+    function renderPreview() {
+      const code = getCode();
+      preview.srcdoc = preparePreviewHTML(code);
+    }
 
-};
+    // Membuka hasil sebagai dokumen HTML di tab browser baru.
+    function openBrowserPreview() {
+      const code = getCode();
+      if (!code.trim()) {
+        alert("Masukkan kode HTML dulu.");
+        return;
+      }
 
-reader.readAsText(file);
+      const html = preparePreviewHTML(code);
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const newUrl = URL.createObjectURL(blob);
 
-});
+      const link = document.createElement("a");
+      link.href = newUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
-const fileInput =
-document.getElementById("fileInput");
+      if (browserPreviewUrl) {
+        setTimeout(function () {
+          URL.revokeObjectURL(browserPreviewUrl);
+        }, 60000);
+      }
+      browserPreviewUrl = newUrl;
 
-function openFile(){
-fileInput.click();
-}
+      setTimeout(function () {
+        if (browserPreviewUrl === newUrl) {
+          URL.revokeObjectURL(newUrl);
+          browserPreviewUrl = null;
+        }
+      }, 10 * 60 * 1000);
+    }
 
-</script>
+    function openFile() {
+      fileInput.click();
+    }
 
+    fileInput.addEventListener("change", function (event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (loadEvent) {
+        setCode(String(loadEvent.target.result || ""));
+        showCode();
+      };
+      reader.onerror = function () {
+        alert("File gagal dibaca. Coba pilih file HTML lain.");
+      };
+      reader.readAsText(file);
+      fileInput.value = "";
+    });
+  </script>
 </body>
 </html>
