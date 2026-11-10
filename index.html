@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f1115">
-  <title>Pro Runner</title>
+  <title>PRO RUNNER</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="manifest" href="/manifest.json">
 
-  <!-- CodeMirror 5: editor dengan syntax highlighting HTML -->
+  <!-- CodeMirror 5 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/neo.min.css">
 
   <style>
     * {
@@ -20,65 +20,102 @@
       box-sizing: border-box;
     }
 
-    html,
-    body {
+    :root {
+      /* Tema Gelap Minimalis */
+      --bg-body: #0f1115;
+      --bg-header: #181b22;
+      --bg-btn: #252a35;
+      --bg-btn-hover: #323846;
+      --bg-btn-active: #3e4657;
+      --border-color: #333333;
+      --text-color: #ffffff;
+      --text-sub: #aaaaaa;
+      --editor-bg: #111111;
+      --popup-bg: #1c2029;
+      --modal-bg: #181b22;
+    }
+
+    [data-theme="light"] {
+      /* Tema Terang Minimalis */
+      --bg-body: #f5f5f7;
+      --bg-header: #ffffff;
+      --bg-btn: #e5e5ea;
+      --bg-btn-hover: #d1d1d6;
+      --bg-btn-active: #c7c7cc;
+      --border-color: #dddddd;
+      --text-color: #1c1c1e;
+      --text-sub: #666666;
+      --editor-bg: #ffffff;
+      --popup-bg: #ffffff;
+      --modal-bg: #ffffff;
+    }
+
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      font-family: Arial, sans-serif;
-      background: #0f1115;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-color);
     }
 
     #header {
       position: fixed;
-      top: 25px;
+      top: 0;
       left: 0;
       right: 0;
       height: 55px;
-      background: #181b22;
-      border-bottom: 1px solid #333;
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 0 10px;
-      z-index: 99999;
+      padding: 0 14px;
+      z-index: 999;
     }
 
     #title {
-      color: white;
+      color: var(--text-color);
       font-weight: bold;
-      font-size: 15px;
+      font-size: 16px;
+      letter-spacing: 0.5px;
       white-space: nowrap;
     }
 
     #menu {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
 
-    .btn,
     .tool-btn {
-      width: 36px;
       height: 35px;
-      flex: 0 0 36px;
-      border: none;
-      border-radius: 8px;
-      background: #252a35;
-      color: white;
+      padding: 0 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-btn);
+      color: var(--text-color);
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
     }
 
-    .btn:active,
-    .tool-btn:active {
-      background: #354052;
+    .tool-btn:hover {
+      background: var(--bg-btn-hover);
+    }
+
+    .tool-btn.active {
+      background: var(--bg-btn-active);
+      border-color: var(--text-sub);
     }
 
     #content {
       position: fixed;
-      top: 80px;
+      top: 55px;
       left: 0;
       right: 0;
       bottom: 0;
@@ -89,7 +126,8 @@
     #editorPane {
       min-width: 0;
       min-height: 0;
-      background: #111;
+      background: var(--editor-bg);
+      position: relative;
     }
 
     #editor {
@@ -100,8 +138,8 @@
       resize: none;
       outline: none;
       border: none;
-      background: #111;
-      color: #fff;
+      background: var(--editor-bg);
+      color: var(--text-color);
       font: 14px/1.5 monospace;
       tab-size: 2;
     }
@@ -110,10 +148,18 @@
       width: 100%;
       height: 100%;
       font: 14px/1.5 monospace;
+      background: var(--editor-bg) !important;
+      color: var(--text-color) !important;
     }
 
     .CodeMirror-gutters {
-      border-right: 1px solid #30343d;
+      border-right: 1px solid var(--border-color) !important;
+      background: var(--bg-header) !important;
+    }
+
+    [data-theme="light"] .cm-s-neo .CodeMirror-gutters {
+      background: #e8e8ed !important;
+      border-right: 1px solid #d1d1d6 !important;
     }
 
     #preview {
@@ -126,39 +172,35 @@
       background: white;
     }
 
-    /* Mode editor: hanya editor yang terlihat */
+    /* Mode editor */
     #content.mode-editor #editorPane {
       display: block;
       width: 100%;
       height: 100%;
     }
-
     #content.mode-editor #preview {
       display: none;
     }
 
-    /* Mode preview: hanya hasil website yang terlihat */
+    /* Mode preview */
     #content.mode-preview #editorPane {
       display: none;
     }
-
     #content.mode-preview #preview {
       display: block;
     }
 
-    /* Mode live: editor dan hasil website tampil bersamaan */
+    /* Mode live */
     #content.mode-live {
       flex-direction: column;
     }
-
     #content.mode-live #editorPane {
       display: block;
       width: 100%;
       height: 50%;
       flex: 0 0 50%;
-      border-bottom: 1px solid #3a3f49;
+      border-bottom: 1px solid var(--border-color);
     }
-
     #content.mode-live #preview {
       display: block;
       width: 100%;
@@ -166,19 +208,17 @@
       flex: 0 0 50%;
     }
 
-    @media (min-width: 900px) {
+    @media (min-width: 850px) {
       #content.mode-live {
         flex-direction: row;
       }
-
       #content.mode-live #editorPane {
         width: 50%;
         height: 100%;
         flex: 0 0 50%;
         border-bottom: none;
-        border-right: 1px solid #3a3f49;
+        border-right: 1px solid var(--border-color);
       }
-
       #content.mode-live #preview {
         width: 50%;
         height: 100%;
@@ -186,58 +226,237 @@
       }
     }
 
-    @media (max-width: 380px) {
-      #header {
-        padding: 0 6px;
-        gap: 4px;
-      }
+    /* POP-UP BUNDAR DI KANAN BAWAH (FAB) */
+    .fab-wrapper {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
 
-      #title {
-        font-size: 13px;
-      }
+    .fab-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-btn);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: background 0.15s, transform 0.15s;
+    }
 
-      #menu {
-        gap: 3px;
-      }
+    .fab-btn:hover {
+      background: var(--bg-btn-hover);
+    }
 
-      .btn,
+    .fab-btn.active {
+      transform: rotate(45deg);
+    }
+
+    .fab-popover {
+      position: absolute;
+      bottom: 58px;
+      right: 0;
+      width: 170px;
+      background: var(--popup-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    }
+
+    .fab-popover.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .fab-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 10px;
+      border: none;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-color);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .fab-item:hover {
+      background: var(--bg-btn);
+    }
+
+    .fab-item i {
+      width: 16px;
+      text-align: center;
+      color: var(--text-sub);
+    }
+
+    /* MODAL SHARE */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1005;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--modal-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .modal-head h3 {
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    .modal-foot {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-foot button {
+      width: 100%;
+      padding: 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-btn);
+      color: var(--text-color);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .modal-foot button:hover {
+      background: var(--bg-btn-hover);
+    }
+
+    /* TOAST NOTIFIKASI */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--popup-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+      z-index: 1010;
+    }
+
+    #toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .tool-btn span {
+        display: none;
+      }
       .tool-btn {
-        width: 33px;
-        flex-basis: 33px;
+        padding: 0 10px;
       }
     }
   </style>
 </head>
 
 <body>
+  <!-- HEADER -->
   <header id="header">
     <div id="title">PRO RUNNER</div>
 
     <nav id="menu" aria-label="Editor tools">
-      <button class="btn" type="button" onclick="openFile()" title="Buka file HTML" aria-label="Buka file HTML">
-        <i class="fa-solid fa-upload"></i>
+      <button class="tool-btn active" id="btnCode" type="button" onclick="showCode()" title="Editor">
+        <i class="fa-solid fa-code"></i> <span>Editor</span>
       </button>
 
-      <button class="tool-btn" type="button" onclick="showCode()" title="Editor" aria-label="Editor">
-        <i class="fa-solid fa-code"></i>
+      <button class="tool-btn" id="btnRun" type="button" onclick="runCode()" title="Preview">
+        <i class="fa-solid fa-eye"></i> <span>Preview</span>
       </button>
 
-      <button class="tool-btn" type="button" onclick="runCode()" title="Preview" aria-label="Preview">
-        <i class="fa-solid fa-eye"></i>
+      <button class="tool-btn" id="btnLive" type="button" onclick="showLive()" title="Live Preview">
+        <i class="fa-solid fa-bolt"></i> <span>Live Preview</span>
       </button>
 
-      <button class="tool-btn" type="button" onclick="showLive()" title="Live Preview" aria-label="Live Preview">
-        <i class="fa-solid fa-bolt"></i>
-      </button>
-
-      <button class="tool-btn" type="button" onclick="openBrowserPreview()" title="Buka di browser" aria-label="Buka di browser">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      <button class="tool-btn" type="button" onclick="openBrowserPreview()" title="Preview Web (Buka di browser)">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Preview Web</span>
       </button>
     </nav>
   </header>
 
   <input id="fileInput" type="file" accept=".html,.htm,text/html" hidden>
 
+  <!-- MAIN WORKSPACE -->
   <main id="content" class="mode-editor">
     <section id="editorPane" aria-label="Code editor">
       <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Tulis kode HTML di sini..."></textarea>
@@ -245,7 +464,49 @@
     <iframe id="preview" title="Website preview"></iframe>
   </main>
 
-  <!-- CodeMirror core and HTML-related modes -->
+  <!-- POP-UP BUNDAR (FAB) DI KANAN BAWAH -->
+  <div class="fab-wrapper">
+    <button class="fab-btn" id="fabToggle" type="button" onclick="toggleFab()" title="Menu Cepat" aria-label="Menu Cepat">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <div class="fab-popover" id="fabPopover">
+      <button class="fab-item" type="button" onclick="triggerFilePicker()">
+        <i class="fa-solid fa-upload"></i> Upload
+      </button>
+
+      <button class="fab-item" type="button" onclick="openShareModal()">
+        <i class="fa-solid fa-share-nodes"></i> Share
+      </button>
+
+      <button class="fab-item" type="button" onclick="toggleTheme()">
+        <i class="fa-solid fa-circle-half-stroke"></i> Tema (<span id="themeLabel">Gelap</span>)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL SHARE (Salin Teks Kode & Unduh File) -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Share Codingan</h3>
+        <button class="close-btn" type="button" onclick="closeShareModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        Bagikan teks kode atau unduh file HTML langsung ke perangkat Anda:
+      </div>
+      <div class="modal-foot">
+        <button type="button" onclick="copyTextCode()"><i class="fa-solid fa-copy"></i> Salin Teks Kode</button>
+        <button type="button" onclick="downloadHtmlFile()"><i class="fa-solid fa-download"></i> Unduh File HTML</button>
+        <button type="button" id="btnNativeShare" onclick="nativeShareText()"><i class="fa-solid fa-paper-plane"></i> Bagikan Teks Kode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- CodeMirror 5 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
@@ -255,58 +516,191 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
 
   <script>
+    const DEFAULT_CODE = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Runner</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      text-align: center;
+      padding: 24px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #1a1a1a;
+    }
+    button {
+      padding: 8px 16px;
+      background: #252a35;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Halo dari Pro Runner</h2>
+    <p>Tulis kode HTML/CSS/JS di editor untuk melihat hasilnya secara live.</p>
+    <button onclick="document.querySelector('p').textContent = 'Live Preview Berhasil!'">Uji Coba</button>
+  </div>
+</body>
+</html>`;
+
     const textarea = document.getElementById("editor");
     const content = document.getElementById("content");
     const preview = document.getElementById("preview");
     const fileInput = document.getElementById("fileInput");
+    const fabToggle = document.getElementById("fabToggle");
+    const fabPopover = document.getElementById("fabPopover");
+    const shareModal = document.getElementById("shareModal");
+    const themeLabel = document.getElementById("themeLabel");
+    const toastEl = document.getElementById("toast");
 
     let codeEditor = null;
     let previewTimer = null;
+    let cacheSaveTimer = null;
     let browserPreviewUrl = null;
+    let currentTheme = "dark";
 
-    // Pakai CodeMirror bila CDN berhasil dimuat. Jika gagal, textarea tetap bisa dipakai.
-    if (window.CodeMirror) {
-      codeEditor = CodeMirror.fromTextArea(textarea, {
-        mode: "htmlmixed",
-        theme: "material-darker",
-        lineNumbers: true,
-        lineWrapping: true,
-        indentUnit: 2,
-        tabSize: 2,
-        indentWithTabs: false,
-        autoCloseTags: true,
-        matchBrackets: true,
-        viewportMargin: 30
-      });
+    // INIT ON LOAD
+    window.addEventListener("DOMContentLoaded", function () {
+      initTheme();
+      initEditor();
+      loadCodeFromCache();
 
-      codeEditor.on("change", function () {
-        if (content.classList.contains("mode-live")) {
-          schedulePreviewUpdate();
+      document.addEventListener("click", function (e) {
+        if (!fabPopover.contains(e.target) && !fabToggle.contains(e.target)) {
+          closeFab();
         }
       });
+    });
+
+    // TEMA
+    function initTheme() {
+      try {
+        const saved = localStorage.getItem("prorunner_theme");
+        if (saved === "light" || saved === "dark") {
+          currentTheme = saved;
+        }
+      } catch (e) {}
+      applyTheme(currentTheme);
     }
 
-    // Fallback: jika CodeMirror tidak termuat, live preview tetap berjalan dari textarea.
-    textarea.addEventListener("input", function () {
-      if (!codeEditor && content.classList.contains("mode-live")) {
-        schedulePreviewUpdate();
+    function toggleTheme() {
+      currentTheme = (currentTheme === "dark") ? "light" : "dark";
+      applyTheme(currentTheme);
+      try {
+        localStorage.setItem("prorunner_theme", currentTheme);
+      } catch (e) {}
+      closeFab();
+      showToast("Tema diubah ke " + (currentTheme === "dark" ? "Gelap" : "Terang"));
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      if (themeLabel) {
+        themeLabel.textContent = theme === "dark" ? "Gelap" : "Terang";
       }
-    });
+      if (codeEditor) {
+        codeEditor.setOption("theme", theme === "dark" ? "material-darker" : "neo");
+      }
+    }
+
+    // EDITOR CODEMIRROR
+    function initEditor() {
+      if (window.CodeMirror) {
+        codeEditor = CodeMirror.fromTextArea(textarea, {
+          mode: "htmlmixed",
+          theme: currentTheme === "dark" ? "material-darker" : "neo",
+          lineNumbers: true,
+          lineWrapping: true,
+          indentUnit: 2,
+          tabSize: 2,
+          indentWithTabs: false,
+          autoCloseTags: true,
+          matchBrackets: true,
+          viewportMargin: 30
+        });
+
+        codeEditor.on("change", function () {
+          scheduleSaveCache();
+          if (content.classList.contains("mode-live")) {
+            schedulePreviewUpdate();
+          }
+        });
+      } else {
+        textarea.addEventListener("input", function () {
+          scheduleSaveCache();
+          if (content.classList.contains("mode-live")) {
+            schedulePreviewUpdate();
+          }
+        });
+      }
+    }
+
+    // CACHE LOAD & SAVE
+    function loadCodeFromCache() {
+      let codeToLoad = null;
+      try {
+        const cached = localStorage.getItem("prorunner_code_cache");
+        if (cached && cached.trim()) {
+          codeToLoad = cached;
+        }
+      } catch (e) {}
+
+      if (!codeToLoad) {
+        codeToLoad = DEFAULT_CODE;
+      }
+
+      setCode(codeToLoad);
+    }
+
+    function scheduleSaveCache() {
+      clearTimeout(cacheSaveTimer);
+      cacheSaveTimer = setTimeout(function () {
+        try {
+          localStorage.setItem("prorunner_code_cache", getCode());
+        } catch (e) {}
+      }, 300);
+    }
 
     function getCode() {
       return codeEditor ? codeEditor.getValue() : textarea.value;
     }
 
-    function setCode(value) {
+    function setCode(val) {
       if (codeEditor) {
-        codeEditor.setValue(value);
+        codeEditor.setValue(val);
       } else {
-        textarea.value = value;
+        textarea.value = val;
       }
-
-      if (content.classList.contains("mode-live")) {
+      scheduleSaveCache();
+      if (content.classList.contains("mode-live") || content.classList.contains("mode-preview")) {
         renderPreview();
       }
+    }
+
+    // NAVIGATION MODES
+    function updateActiveBtn(activeId) {
+      document.querySelectorAll(".tool-btn").forEach(function (btn) {
+        btn.classList.remove("active");
+      });
+      const target = document.getElementById(activeId);
+      if (target) target.classList.add("active");
     }
 
     function setMode(mode) {
@@ -322,25 +716,28 @@
 
     function showCode() {
       setMode("editor");
+      updateActiveBtn("btnCode");
     }
 
     function runCode() {
-      if (!getCode().trim()) {
-        alert("Masukkan kode HTML dulu.");
+      const code = getCode();
+      if (!code.trim()) {
+        showToast("Masukkan kode HTML dulu.");
         return;
       }
-
       setMode("preview");
+      updateActiveBtn("btnRun");
       renderPreview();
     }
 
     function showLive() {
-      if (!getCode().trim()) {
-        alert("Masukkan kode HTML dulu.");
+      const code = getCode();
+      if (!code.trim()) {
+        showToast("Masukkan kode HTML dulu.");
         return;
       }
-
       setMode("live");
+      updateActiveBtn("btnLive");
       renderPreview();
     }
 
@@ -349,65 +746,55 @@
       previewTimer = setTimeout(renderPreview, 250);
     }
 
-    // Menambahkan target tab baru dan penanganan link eksternal pada halaman preview.
     function preparePreviewHTML(source) {
-      let html = source;
+      let html = source || "";
       const baseTag = '<base target="_blank">';
 
       if (/<head\b[^>]*>/i.test(html)) {
         if (!/<base\b/i.test(html)) {
-          html = html.replace(/<head\b[^>]*>/i, function (headTag) {
-            return headTag + baseTag;
-          });
+          html = html.replace(/<head\b[^>]*>/i, function (h) { return h + baseTag; });
         }
       } else if (/<html\b[^>]*>/i.test(html)) {
-        html = html.replace(/<html\b[^>]*>/i, function (htmlTag) {
-          return htmlTag + '<head>' + baseTag + '</head>';
-        });
+        html = html.replace(/<html\b[^>]*>/i, function (h) { return h + '<head>' + baseTag + '</head>'; });
       } else {
         html = '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">' + baseTag + '</head><body>' + html + '</body></html>';
       }
 
-      const linkSupportScript = `
+      const linkScript = `
         <script>
-          document.addEventListener('click', function (event) {
-            const anchor = event.target.closest && event.target.closest('a[href]');
-            if (!anchor || anchor.hasAttribute('download')) return;
-
-            const rawHref = anchor.getAttribute('href');
-            if (!rawHref || rawHref.startsWith('#') || /^(javascript:|data:)/i.test(rawHref)) return;
-
-            let destination;
-            try { destination = new URL(rawHref, document.baseURI); }
-            catch (error) { return; }
-
-            if (!['http:', 'https:', 'mailto:', 'tel:'].includes(destination.protocol)) return;
-
-            event.preventDefault();
-            window.open(destination.href, '_blank', 'noopener,noreferrer');
+          document.addEventListener('click', function (e) {
+            const a = e.target.closest && e.target.closest('a[href]');
+            if (!a || a.hasAttribute('download')) return;
+            const href = a.getAttribute('href');
+            if (!href || href.startsWith('#') || /^(javascript:|data:)/i.test(href)) return;
+            try {
+              const url = new URL(href, document.baseURI);
+              if (['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) {
+                e.preventDefault();
+                window.open(url.href, '_blank', 'noopener,noreferrer');
+              }
+            } catch (err) {}
           }, true);
         <\/script>
       `;
 
       if (/<\/body\s*>/i.test(html)) {
-        html = html.replace(/<\/body\s*>/i, linkSupportScript + '</body>');
+        html = html.replace(/<\/body\s*>/i, linkScript + '</body>');
       } else {
-        html += linkSupportScript;
+        html += linkScript;
       }
 
       return html;
     }
 
     function renderPreview() {
-      const code = getCode();
-      preview.srcdoc = preparePreviewHTML(code);
+      preview.srcdoc = preparePreviewHTML(getCode());
     }
 
-    // Membuka hasil sebagai dokumen HTML di tab browser baru.
     function openBrowserPreview() {
       const code = getCode();
       if (!code.trim()) {
-        alert("Masukkan kode HTML dulu.");
+        showToast("Masukkan kode HTML dulu.");
         return;
       }
 
@@ -415,49 +802,136 @@
       const blob = new Blob([html], { type: "text/html;charset=utf-8" });
       const newUrl = URL.createObjectURL(blob);
 
-      const link = document.createElement("a");
-      link.href = newUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const a = document.createElement("a");
+      a.href = newUrl;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      showToast("Membuka preview di tab baru.");
 
       if (browserPreviewUrl) {
-        setTimeout(function () {
-          URL.revokeObjectURL(browserPreviewUrl);
-        }, 60000);
+        setTimeout(function () { URL.revokeObjectURL(browserPreviewUrl); }, 60000);
       }
       browserPreviewUrl = newUrl;
-
-      setTimeout(function () {
-        if (browserPreviewUrl === newUrl) {
-          URL.revokeObjectURL(newUrl);
-          browserPreviewUrl = null;
-        }
-      }, 10 * 60 * 1000);
     }
 
-    function openFile() {
+    // FAB POP-UP (Hanya Upload, Share, Tema)
+    function toggleFab() {
+      const isOpen = fabPopover.classList.contains("open");
+      if (isOpen) {
+        closeFab();
+      } else {
+        fabPopover.classList.add("open");
+        fabToggle.classList.add("active");
+      }
+    }
+
+    function closeFab() {
+      fabPopover.classList.remove("open");
+      fabToggle.classList.remove("active");
+    }
+
+    function triggerFilePicker() {
+      closeFab();
       fileInput.click();
     }
 
-    fileInput.addEventListener("change", function (event) {
-      const file = event.target.files && event.target.files[0];
+    fileInput.addEventListener("change", function (e) {
+      const file = e.target.files && e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function (loadEvent) {
-        setCode(String(loadEvent.target.result || ""));
+      reader.onload = function (evt) {
+        setCode(String(evt.target.result || ""));
         showCode();
+        showToast("File HTML berhasil dimuat.");
       };
       reader.onerror = function () {
-        alert("File gagal dibaca. Coba pilih file HTML lain.");
+        showToast("Gagal membaca file HTML.");
       };
       reader.readAsText(file);
       fileInput.value = "";
     });
+
+    // MODAL SHARE (Salin Teks Kode & Unduh File HTML)
+    function openShareModal() {
+      closeFab();
+      const code = getCode();
+      if (!code.trim()) {
+        showToast("Masukkan kode dulu sebelum membagikan.");
+        return;
+      }
+      shareModal.classList.add("active");
+    }
+
+    function closeShareModal() {
+      shareModal.classList.remove("active");
+    }
+
+    function copyTextCode() {
+      const code = getCode();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(function () {
+          showToast("Teks kode disalin ke clipboard!");
+          closeShareModal();
+        }).catch(function () {
+          fallbackCopyText(code);
+        });
+      } else {
+        fallbackCopyText(code);
+      }
+    }
+
+    function fallbackCopyText(code) {
+      const ta = document.createElement("textarea");
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      showToast("Teks kode disalin ke clipboard!");
+      closeShareModal();
+    }
+
+    function downloadHtmlFile() {
+      const code = getCode();
+      const blob = new Blob([code], { type: "text/html;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "prorunner_code.html";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("File HTML berhasil diunduh.");
+      closeShareModal();
+    }
+
+    function nativeShareText() {
+      const code = getCode();
+      if (navigator.share) {
+        navigator.share({
+          title: "Kode Pro Runner",
+          text: code
+        }).then(function () {
+          closeShareModal();
+        }).catch(function () {});
+      } else {
+        copyTextCode();
+      }
+    }
+
+    // TOAST
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(function () {
+        toastEl.classList.remove("show");
+      }, 2500);
+    }
   </script>
 </body>
 </html>
