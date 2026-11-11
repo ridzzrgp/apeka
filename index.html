@@ -476,6 +476,10 @@
         <i class="fa-solid fa-upload"></i> Upload
       </button>
 
+      <button class="fab-item" type="button" onclick="openClearCodeModal()">
+        <i class="fa-solid fa-trash"></i> Clear Code
+      </button>
+
       <button class="fab-item" type="button" onclick="openShareModal()">
         <i class="fa-solid fa-share-nodes"></i> Share
       </button>
@@ -483,6 +487,23 @@
       <button class="fab-item" type="button" onclick="toggleTheme()">
         <i class="fa-solid fa-circle-half-stroke"></i> Tema (<span id="themeLabel">Gelap</span>)
       </button>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI CLEAR CODE -->
+  <div class="modal-overlay" id="clearCodeModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Clear Code</h3>
+        <button class="close-btn" type="button" onclick="closeClearCodeModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        Yakin ingin menghapus semua kode?
+      </div>
+      <div class="modal-foot">
+        <button type="button" onclick="closeClearCodeModal()">Tidak</button>
+        <button type="button" onclick="clearAllCode()">Ya</button>
+      </div>
     </div>
   </div>
 
@@ -517,50 +538,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
 
   <script>
-    const DEFAULT_CODE = `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Runner</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .box {
-      text-align: center;
-      padding: 24px;
-      border: 1px solid #333;
-      border-radius: 8px;
-      background: #1a1a1a;
-    }
-    button {
-      padding: 8px 16px;
-      background: #252a35;
-      color: white;
-      border: 1px solid #444;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 12px;
-    }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h2>Halo dari Pro Runner</h2>
-    <p>Tulis kode HTML/CSS/JS di editor untuk melihat hasilnya secara live.</p>
-    <button onclick="document.querySelector('p').textContent = 'Live Preview Berhasil!'">Uji Coba</button>
-  </div>
-</body>
-</html>`;
-
     const textarea = document.getElementById("editor");
     const content = document.getElementById("content");
     const preview = document.getElementById("preview");
@@ -568,6 +545,7 @@
     const fabToggle = document.getElementById("fabToggle");
     const fabPopover = document.getElementById("fabPopover");
     const shareModal = document.getElementById("shareModal");
+    const clearCodeModal = document.getElementById("clearCodeModal");
     const themeLabel = document.getElementById("themeLabel");
     const toastEl = document.getElementById("toast");
 
@@ -663,11 +641,7 @@
         }
       } catch (e) {}
 
-      if (!codeToLoad) {
-        codeToLoad = DEFAULT_CODE;
-      }
-
-      setCode(codeToLoad);
+      setCode(codeToLoad || "");
     }
 
     function scheduleSaveCache() {
@@ -839,6 +813,33 @@
     function triggerFilePicker() {
       closeFab();
       fileInput.click();
+    }
+
+    // CLEAR CODE
+    function openClearCodeModal() {
+      closeFab();
+      clearCodeModal.classList.add("active");
+    }
+
+    function closeClearCodeModal() {
+      clearCodeModal.classList.remove("active");
+    }
+
+    function clearAllCode() {
+      if (codeEditor) {
+        codeEditor.setValue("");
+      } else {
+        textarea.value = "";
+      }
+
+      clearTimeout(cacheSaveTimer);
+      try {
+        localStorage.removeItem("prorunner_code_cache");
+      } catch (e) {}
+
+      closeClearCodeModal();
+      showCode();
+      showToast("Semua kode berhasil dihapus.");
     }
 
     fileInput.addEventListener("change", function (e) {
